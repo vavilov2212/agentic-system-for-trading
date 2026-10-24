@@ -1,0 +1,38 @@
+# Agentic System For Trading
+
+## [Container Diagram](./docs/container-diagram.mmd)
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Segoe UI, Roboto, Arial, sans-serif", "fontSize": "22px", "textColor": "#0f172a", "lineColor": "#475569", "edgeLabelBackground": "#ffffff", "primaryTextColor": "#0f172a"}, "flowchart": {"curve": "basis", "nodeSpacing": 40, "rankSpacing": 110, "padding": 30, "htmlLabels": false}}}%%
+flowchart LR
+    subgraph canvas [" "]
+        direction LR
+        user(["User"])
+        agents["Agent service (Python, FastAPI)"]
+        ingest["Data pipeline (Python job)"]
+        llm["LLM API (Claude)"]
+        embA["Embeddings API (Gemini or OpenAI)"]
+        db[("Database (Postgres + pgvector)")]
+        embI["Embeddings API (Gemini or OpenAI)"]
+        news["News sources (RSS)"]
+        exchange["Market APIs (Binance, CoinGecko)"]
+
+        user -->|"Asks questions · HTTPS"| agents
+        agents -->|"Sends prompts to · HTTPS"| llm
+        agents -->|"Embeds queries via · HTTPS"| embA
+        agents -->|"Reads and writes · SQL"| db
+        ingest -->|"Writes data to · SQL"| db
+        ingest -->|"Embeds news via · HTTPS"| embI
+        ingest -->|"Fetches articles from · HTTPS"| news
+        ingest -->|"Requests prices from · HTTPS"| exchange
+    end
+
+    classDef person fill:#0b3d6f,stroke:#082a4d,color:#ffffff,stroke-width:2px
+    classDef container fill:#1f7ae0,stroke:#145ab0,color:#ffffff,stroke-width:2px
+    classDef external fill:#8b949e,stroke:#5b636b,color:#ffffff,stroke-width:2px
+    class user person
+    class agents,ingest,db container
+    class llm,embA,embI,news,exchange external
+    style canvas fill:#ffffff,stroke:#ffffff
+```
+
