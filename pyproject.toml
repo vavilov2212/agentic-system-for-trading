@@ -1,0 +1,17 @@
+[project]
+name = "agentic-system-for-trading"
+version = "0.1.0"
+description = "Multi-agent LLM system for crypto market analysis and paper trading"
+readme = "README.md"
+authors = [
+    { name = "Roman Vavilov", email = "40688439+vavilov2212@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+agentic-system-for-trading = "agentic_system_for_trading:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
