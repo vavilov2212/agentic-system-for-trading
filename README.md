@@ -85,3 +85,150 @@ sequenceDiagram
         API-->>U: Order status
     end
 ```
+
+## [Entity Relationship Diagram](./docs/er-diagram.mmd)
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Segoe UI, Roboto, Arial, sans-serif", "fontSize": "16px", "textColor": "#0f172a", "lineColor": "#475569", "primaryColor": "#dbeafe", "primaryTextColor": "#0f172a", "primaryBorderColor": "#1f7ae0", "secondaryColor": "#f1f5f9", "tertiaryColor": "#ffffff", "edgeLabelBackground": "#ffffff"}}}%%
+erDiagram
+    ASSET ||--o{ JOB : "requested for"
+    ASSET ||--o{ MARKET_SNAPSHOT : "has"
+    ASSET ||--o{ NEWS_DOC_ASSET : "mentioned in"
+    ASSET ||--o{ SIGNAL : "subject of"
+    JOB ||--o| MARKET_SNAPSHOT : "produces"
+    JOB ||--o{ NEWS_DOC : "produces"
+    NEWS_DOC ||--|{ NEWS_CHUNK : "split into"
+    NEWS_DOC ||--o{ NEWS_DOC_ASSET : "mentions"
+    SESSION ||--o{ MESSAGE : "contains"
+    SESSION ||--o{ AGENT_RUN : "has"
+    AGENT_RUN ||--o{ MESSAGE : "answers with"
+    AGENT_RUN ||--o{ VALIDATION : "checked by"
+    AGENT_RUN ||--o{ SIGNAL : "produces"
+    SIGNAL ||--o{ SIGNAL_SOURCE : "cites"
+    NEWS_CHUNK ||--o{ SIGNAL_SOURCE : "cited by"
+    SIGNAL |o--o| SIGNAL : "supersedes"
+    SIGNAL ||--o{ TRADE_ORDER : "executed as"
+
+    ASSET {
+        int id PK
+        string ticker
+        string name
+    }
+    JOB {
+        int id PK
+        int asset_id FK
+        string job_type
+        string source
+        jsonb params
+        string status
+        int attempts
+        int max_attempts
+        datetime next_retry_at
+        datetime created_at
+        datetime started_at
+        datetime finished_at
+        string error
+    }
+    MARKET_SNAPSHOT {
+        int id PK
+        int asset_id FK
+        int job_id FK
+        string source
+        datetime captured_at
+        decimal bid
+        decimal ask
+        decimal low_24h
+        decimal high_24h
+        decimal volume_24h
+        decimal change_pct_24h
+    }
+    NEWS_DOC {
+        int id PK
+        int job_id FK
+        string source
+        string url
+        string title
+        datetime published_at
+        text body
+        string content_hash
+        jsonb extra
+    }
+    NEWS_DOC_ASSET {
+        int doc_id FK
+        int asset_id FK
+    }
+    NEWS_CHUNK {
+        int id PK
+        int doc_id FK
+        int position
+        text text
+        vector embedding
+    }
+    SESSION {
+        int id PK
+        datetime created_at
+        datetime last_active_at
+    }
+    MESSAGE {
+        int id PK
+        int session_id FK
+        int run_id FK
+        string role
+        text content
+        datetime created_at
+    }
+    AGENT_RUN {
+        int id PK
+        int session_id FK
+        string question
+        text answer
+        string status
+        int rounds
+        string model
+        string prompt_version
+        int tokens_in
+        int tokens_out
+        decimal cost_usd
+        int latency_ms
+        datetime created_at
+    }
+    VALIDATION {
+        int id PK
+        int run_id FK
+        int round_no
+        string verdict
+        text remarks
+        string model
+        datetime created_at
+    }
+    SIGNAL {
+        int id PK
+        int run_id FK
+        int asset_id FK
+        int supersedes_id FK
+        string action
+        decimal confidence
+        text reason
+        string status
+        datetime confirmed_at
+        datetime created_at
+    }
+    SIGNAL_SOURCE {
+        int signal_id FK
+        int chunk_id FK
+    }
+    TRADE_ORDER {
+        int id PK
+        int signal_id FK
+        string exchange
+        string mode
+        string side
+        decimal quantity
+        string status
+        boolean risk_passed
+        jsonb risk_details
+        string exchange_order_id
+        datetime created_at
+        datetime filled_at
+    }
+```
