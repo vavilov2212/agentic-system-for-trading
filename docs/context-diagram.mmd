@@ -1,0 +1,27 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Segoe UI, Roboto, Arial, sans-serif", "fontSize": "22px", "textColor": "#0f172a", "lineColor": "#475569", "edgeLabelBackground": "#ffffff", "primaryTextColor": "#0f172a"}, "flowchart": {"curve": "basis", "nodeSpacing": 40, "rankSpacing": 130, "padding": 30, "htmlLabels": false}}}%%
+flowchart LR
+    subgraph canvas [" "]
+        direction LR
+        user(["User"])
+        system["Crypto analyst agent (answers market questions, produces validated signals)"]
+        llm["LLM API (Claude)"]
+        emb["Embeddings API (Gemini or OpenAI)"]
+        news["News sources (RSS)"]
+        market["Market data APIs (Binance, CoinGecko)"]
+        exchange["Exchange (Binance testnet)"]
+
+        user -->|"Asks questions, confirms signals · HTTPS"| system
+        system -->|"Sends prompts to · HTTPS"| llm
+        system -->|"Embeds text via · HTTPS"| emb
+        system -->|"Fetches articles from · HTTPS"| news
+        system -->|"Requests prices from · HTTPS"| market
+        system -->|"Places paper orders on · HTTPS"| exchange
+    end
+
+    classDef person fill:#0b3d6f,stroke:#082a4d,color:#ffffff,stroke-width:2px
+    classDef ours fill:#1f7ae0,stroke:#145ab0,color:#ffffff,stroke-width:2px
+    classDef external fill:#8b949e,stroke:#5b636b,color:#ffffff,stroke-width:2px
+    class user person
+    class system ours
+    class llm,emb,news,market,exchange external
+    style canvas fill:#ffffff,stroke:#ffffff

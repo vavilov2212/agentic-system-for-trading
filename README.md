@@ -1,5 +1,37 @@
 # Agentic System For Trading
 
+## [Context Diagram](./docs/context-diagram.mmd)
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Segoe UI, Roboto, Arial, sans-serif", "fontSize": "22px", "textColor": "#0f172a", "lineColor": "#475569", "edgeLabelBackground": "#ffffff", "primaryTextColor": "#0f172a"}, "flowchart": {"curve": "basis", "nodeSpacing": 40, "rankSpacing": 130, "padding": 30, "htmlLabels": false}}}%%
+flowchart LR
+    subgraph canvas [" "]
+        direction LR
+        user(["User"])
+        system["Crypto analyst agent (answers market questions, produces validated signals)"]
+        llm["LLM API (Claude)"]
+        emb["Embeddings API (Gemini or OpenAI)"]
+        news["News sources (RSS)"]
+        market["Market data APIs (Binance, CoinGecko)"]
+        exchange["Exchange (Binance testnet)"]
+
+        user -->|"Asks questions, confirms signals · HTTPS"| system
+        system -->|"Sends prompts to · HTTPS"| llm
+        system -->|"Embeds text via · HTTPS"| emb
+        system -->|"Fetches articles from · HTTPS"| news
+        system -->|"Requests prices from · HTTPS"| market
+        system -->|"Places paper orders on · HTTPS"| exchange
+    end
+
+    classDef person fill:#0b3d6f,stroke:#082a4d,color:#ffffff,stroke-width:2px
+    classDef ours fill:#1f7ae0,stroke:#145ab0,color:#ffffff,stroke-width:2px
+    classDef external fill:#8b949e,stroke:#5b636b,color:#ffffff,stroke-width:2px
+    class user person
+    class system ours
+    class llm,emb,news,market,exchange external
+    style canvas fill:#ffffff,stroke:#ffffff
+```
+
 ## [Container Diagram](./docs/container-diagram.mmd)
 
 ```mermaid
@@ -33,6 +65,62 @@ flowchart LR
     class user person
     class agents,ingest,db container
     class llm,embA,embI,news,exchange external
+    style canvas fill:#ffffff,stroke:#ffffff
+```
+
+## [Component Diagram (Agent Service)](./docs/component-diagram.mmd)
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Segoe UI, Roboto, Arial, sans-serif", "fontSize": "20px", "textColor": "#0f172a", "lineColor": "#475569", "edgeLabelBackground": "#ffffff", "primaryTextColor": "#0f172a"}, "flowchart": {"curve": "basis", "nodeSpacing": 35, "rankSpacing": 100, "padding": 30, "htmlLabels": false}}}%%
+flowchart LR
+    subgraph canvas [" "]
+        direction LR
+        routes["HTTP routes (FastAPI)"]
+        orch["Orchestrator (analyst-validator loop)"]
+        exec["Execution service"]
+        analyst["Analyst agent"]
+        validator["Validator agent"]
+        risk["Risk engine (plain code)"]
+        pLLM["LLMClient (interface)"]
+        pStore["VectorStore (interface)"]
+        pRepo["Repository (interface)"]
+        pBroker["Broker (interface)"]
+        pRule["RiskRule (interface)"]
+        claude["ClaudeClient (Anthropic SDK)"]
+        pgv["PgVectorStore (pgvector, SQL)"]
+        pgrepo["PostgresRepository (SQL)"]
+        paper["PaperBroker (ccxt, testnet)"]
+        rules["Risk rules (position size, drawdown, kill switch)"]
+
+        routes -->|"Runs question"| orch
+        routes -->|"Confirms signal"| exec
+        orch -->|"Delegates draft to"| analyst
+        orch -->|"Sends draft to"| validator
+        orch -->|"Loads and saves history via"| pRepo
+        analyst -->|"Calls model via"| pLLM
+        analyst -->|"Searches news via"| pStore
+        analyst -->|"Reads prices via"| pRepo
+        validator -->|"Calls model via"| pLLM
+        validator -->|"Checks sources via"| pRepo
+        exec -->|"Checks order with"| risk
+        exec -->|"Places order via"| pBroker
+        exec -->|"Saves order via"| pRepo
+        risk -->|"Applies rules via"| pRule
+        pLLM -.->|"implemented by"| claude
+        pStore -.->|"implemented by"| pgv
+        pRepo -.->|"implemented by"| pgrepo
+        pBroker -.->|"implemented by"| paper
+        pRule -.->|"implemented by"| rules
+    end
+
+    classDef api fill:#0b3d6f,stroke:#082a4d,color:#ffffff,stroke-width:2px
+    classDef core fill:#1f7ae0,stroke:#145ab0,color:#ffffff,stroke-width:2px
+    classDef port fill:#ffffff,stroke:#1f7ae0,color:#0f172a,stroke-width:2px,stroke-dasharray:6 4
+    classDef adapter fill:#0f766e,stroke:#0b5a54,color:#ffffff,stroke-width:2px
+    class routes api
+    class orch,exec,analyst,validator,risk core
+    class pLLM,pStore,pRepo,pBroker,pRule port
+    class claude,pgv,pgrepo,paper,rules adapter
     style canvas fill:#ffffff,stroke:#ffffff
 ```
 
