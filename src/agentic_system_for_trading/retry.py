@@ -9,9 +9,7 @@ class RetryPolicy:
         retry_on: tuple = (ConnectionError, TimeoutError),
         sleep=time.sleep,
     ):
-        if sleep is None:
-            sleep = []
-        self.sleep = time.sleep
+        self.sleep = sleep
         self.max_attempts = max_attempts
         self.base_delay_s = base_delay_s
         self.retry_on = retry_on

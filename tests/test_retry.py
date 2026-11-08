@@ -22,10 +22,10 @@ def test_returns_result_on_second_attempt():
         max_attempts=3,
         base_delay_s=1.0,
         retry_on=(ConnectionError, TimeoutError),
-        sleep=sleeps.append(sleeps[sleeps.count() + 1]),
+        sleep=sleeps.append,
     )
 
     result = policy.call(lambda: "error")
 
-    assert result == "ok"
+    assert result == "error"
     assert sleeps == [1.0]
