@@ -3,8 +3,7 @@ from decimal import Decimal
 from unittest.mock import Mock
 
 import pytest
-
-from agentic_system_for_trading.sources.ccxtSource import (
+from agentic_system_for_trading.sources.ccxt_source import (
     CcxtSource,
     ticker_to_snapshot,
 )
