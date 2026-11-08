@@ -1,27 +1,26 @@
+import time
+
+
 class RetryPolicy:
     def __init__(
         self,
         max_attempts: int = 3,
         base_delay_s: float = 1.0,
         retry_on: tuple = (ConnectionError, TimeoutError),
-        sleep: list | None = None,
+        sleep=time.sleep,
     ):
         if sleep is None:
             sleep = []
-        self.sleep = sleep
+        self.sleep = time.sleep
         self.max_attempts = max_attempts
         self.base_delay_s = base_delay_s
         self.retry_on = retry_on
 
     def call(self, callback):
-        print("call")
-
-        while self.attempts <= self.max_attempts:
+        for attempt in range(1, self.max_attempts + 1):
             try:
-                callback()
-
-                return "ok"
+                return callback()
             except self.retry_on:
-                self.sleep()
+                self.sleep(self.base_delay_s)
 
         return "error"
