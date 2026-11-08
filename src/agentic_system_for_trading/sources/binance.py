@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 import ccxt
@@ -36,7 +36,7 @@ def ticker_to_snapshot(ticker: dict, source: str) -> MarketSnapshot:
     return MarketSnapshot(
         symbol=ticker["symbol"],
         source=source,
-        captured_at=datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc),
+        captured_at=datetime.fromtimestamp(timestamp_ms / 1000, tz=UTC),
         bid=_to_decimal(ticker, "bid"),
         ask=_to_decimal(ticker, "ask"),
         low_24h=_to_decimal(ticker, "low"),
