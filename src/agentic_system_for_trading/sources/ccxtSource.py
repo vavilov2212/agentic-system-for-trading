@@ -6,9 +6,14 @@ import ccxt
 from agentic_system_for_trading.models import MarketSnapshot
 
 
-class BinanceSource:
-    def __init__(self) -> None:
-        self._exchange = ccxt.binance()
+class CcxtSource:
+    def __init__(self, exchange_id: str, exchange: ccxt.Exchange | None = None) -> None:
+        if exchange is None:
+            if exchange_id not in ccxt.exchanges:
+                raise ValueError(f"unknown exchange '{exchange_id}'")
+            exchange = getattr(ccxt, exchange_id)()
+        self._exchange = exchange
+        self._source = exchange_id
 
     def is_available(self) -> bool:
         try:
@@ -19,7 +24,7 @@ class BinanceSource:
 
     def fetch_snapshot(self, symbol: str) -> MarketSnapshot:
         ticker = self._exchange.fetch_ticker(symbol)
-        return ticker_to_snapshot(ticker, source="binance")
+        return ticker_to_snapshot(ticker, source=self._source)
 
 
 def _to_decimal(ticker: dict, key: str) -> Decimal:

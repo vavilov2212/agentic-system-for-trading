@@ -1,9 +1,13 @@
 from datetime import UTC, datetime
 from decimal import Decimal
+from unittest.mock import Mock
 
 import pytest
 
-from agentic_system_for_trading.sources.binance import ticker_to_snapshot
+from agentic_system_for_trading.sources.ccxtSource import (
+    CcxtSource,
+    ticker_to_snapshot,
+)
 
 SAMPLE_TICKER = {
     "symbol": "BTC/USDT",
@@ -20,6 +24,7 @@ SAMPLE_TICKER = {
 def test_ticker_to_snapshot_maps_fields():
     snapshot = ticker_to_snapshot(SAMPLE_TICKER, source="binance")
     assert snapshot.symbol == SAMPLE_TICKER["symbol"]
+    assert snapshot.source == "binance"
     assert snapshot.captured_at == datetime(2025, 10, 25, 13, 46, 40, tzinfo=UTC)
     assert snapshot.bid == Decimal(str(SAMPLE_TICKER["bid"]))
     assert snapshot.low_24h == Decimal(str(SAMPLE_TICKER["low"]))
@@ -33,3 +38,17 @@ def test_ticker_to_snapshot_rejects_missing_bid():
 
     with pytest.raises(ValueError, match="bid"):
         ticker_to_snapshot(ticker, source="binance")
+
+
+# def test_fetch_snapshot_raises_error():
+#     ticker = CcxtSource("binance").fetch_snapshot(symbol=SAMPLE_TICKER["symbol"])
+
+
+def test_fetch_snapshot_with_mock():
+    exchange = Mock()
+    exchange.fetch_ticker.return_value = SAMPLE_TICKER
+
+    snapshot = CcxtSource("binance", exchange=exchange).fetch_snapshot("BTC/USDT")
+
+    exchange.fetch_ticker.assert_called_once_with("BTC/USDT")
+    assert snapshot.symbol == "BTC/USDT"
