@@ -18,6 +18,14 @@ def test_returns_result_without_sleeping_when_first_call_succeeds():
 
 def test_returns_result_on_second_attempt():
     sleeps = []
+    calls = []
+
+    def flaky():
+        calls.append(1)
+        if len(calls) == 1:
+            raise ConnectionError("down")
+        return "ok"
+
     policy = RetryPolicy(
         max_attempts=3,
         base_delay_s=1.0,
@@ -25,7 +33,7 @@ def test_returns_result_on_second_attempt():
         sleep=sleeps.append,
     )
 
-    result = policy.call(lambda: "error")
+    result = policy.call(flaky)
 
-    assert result == "error"
+    assert result == "ok"
     assert sleeps == [1.0]
