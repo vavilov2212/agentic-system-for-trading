@@ -15,10 +15,12 @@ class RetryPolicy:
         self.retry_on = retry_on
 
     def call(self, callback):
-        for attempt in range(self.max_attempts + 1):
+        exception = None
+        for attempt in range(1, self.max_attempts + 1):
             try:
                 return callback()
-            except self.retry_on:
-                self.sleep(self.base_delay_s + attempt)
+            except self.retry_on as e:
+                self.sleep(self.base_delay_s * 2 ** (attempt - 1))
+                exception = e
 
-        return "error"
+        raise exception
