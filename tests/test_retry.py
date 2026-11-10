@@ -73,7 +73,7 @@ def test_raises_last_error_when_all_attempts_failed():
 
     with pytest.raises(ConnectionError):
         policy = RetryPolicy(
-            max_attempts=2,
+            max_attempts=3,
             base_delay_s=1.0,
             retry_on=(ConnectionError, TimeoutError),
             sleep=sleeps.append,
