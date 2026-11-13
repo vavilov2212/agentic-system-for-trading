@@ -74,9 +74,10 @@ def test_collect_saves_snapshot_from_source_to_sink():
 def test_collect_saves_snapshot_only_once_when_retry_happens():
     snapshot = make_snapshot()
     sink = InMemorySink()
+    source = FakeSource(snapshot, failures=2)
 
     collector = Collector(
-        source=FakeSource(snapshot),
+        source=source,
         sink=sink,
         retry=RetryPolicy(
             max_attempts=3,
@@ -88,6 +89,7 @@ def test_collect_saves_snapshot_only_once_when_retry_happens():
     collector.collect("BTC/USDT")
 
     assert sink.saved == [snapshot]
+    assert source.calls == 3
 
 
 def test_collect_raise_error_when_conncetion_error():
